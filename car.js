@@ -9,11 +9,17 @@ class Car{
         this.accelertion = 0.2;
         this.maxSpeed = 3;
         this.friction = 0.05;
+        this.angle = 0;
 
         this.controls = new Controls();
     }
 
     update(){
+        this.#move();
+    }
+
+    // Control of move logic
+    #move(){
         // forward and backward
         if(this.controls.forward){
             this.speed += this.accelertion;
@@ -38,26 +44,40 @@ class Car{
         if(Math.abs(this.speed) < this.friction){
             this.speed = 0;
         }
-        // left and rigth
-        if(this.controls.left){
-            this.x -= 2;
-        }
-        if(this.controls.right){
-            this.x += 2;
+        
+        // left and rigth (circular motion 0 to 360 degree)
+        if(this.speed != 0){
+            const flip = this.speed > 0 ? 1 : -1;
+
+            if(this.controls.left){
+                this.angle += 0.03 * flip;
+            }
+            if(this.controls.right){
+                this.angle -= 0.03 * flip;
+            }
         }
 
-        this.y -= this.speed;
+        this.x -= Math.sin(this.angle) * this.speed;
+        this.y -= Math.cos(this.angle) * this.speed;
     }
 
     draw(ctx){
+        ctx.save();
+
+        ctx.translate(this.x, this.y);
+        ctx.rotate(-this.angle);
+
         ctx.beginPath();
         ctx.rect(
-            this.x - this.width/2,
-            this.y - this.height/2,
+            -this.width/2,
+            -this.height/2,
             this.width,
             this.height
         );
+
         ctx.fill();
+
+        ctx.restore();
     }
 
 }
